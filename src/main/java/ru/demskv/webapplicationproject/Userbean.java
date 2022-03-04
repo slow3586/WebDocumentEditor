@@ -14,7 +14,6 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 
 @Named
-@RequestScoped
 public class Userbean {
     
     @NotBlank (message = "Name should not be blank")

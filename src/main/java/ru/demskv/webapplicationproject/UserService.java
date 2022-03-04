@@ -15,8 +15,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import java.io.IOException;
 
-@Path("userservice/")
-@RequestScoped
+//@Path("userservice/")
 public class UserService {
     @Inject
     private User user;
@@ -35,8 +34,8 @@ public class UserService {
     @Inject
     private Event<User> userEvent;
 
-    @GET
-    @Path("getUser")
+    //@GET
+    //@Path("getUser")
     public Response getUser(@Context HttpServletRequest request,
                             @Context HttpServletResponse response)
             throws ServletException, IOException {
@@ -46,8 +45,8 @@ public class UserService {
         return Response.ok().build();
     }
     
-    @GET
-    @Path("getProfileAdmin")
+   // @GET
+    //@Path("getProfileAdmin")
     public Response getProfileAdmin(@Context HttpServletRequest request,
                                     @Context HttpServletResponse response)
             throws ServletException, IOException{
@@ -58,8 +57,8 @@ public class UserService {
         return Response.ok().build();
     }
 
-    @GET
-    @Path("getProfileOperator")
+    //@GET
+    //@Path("getProfileOperator")
     public Response getProfileOperator(@Context HttpServletRequest request,
                                        @Context HttpServletResponse response)
             throws ServletException, IOException{
@@ -70,8 +69,8 @@ public class UserService {
         return Response.ok().build();
     }
 
-    @GET
-    @Path("getProfileDefault")
+    //@GET
+    //@Path("getProfileDefault")
     public Response getProfileDefault(@Context HttpServletRequest request,
                                       @Context HttpServletResponse response)
             throws ServletException, IOException{
