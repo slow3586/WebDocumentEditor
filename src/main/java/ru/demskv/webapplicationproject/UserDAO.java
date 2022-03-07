@@ -7,6 +7,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Query;
 import jakarta.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
+import org.hibernate.Session;
 
 @Singleton
 public class UserDAO {
@@ -15,15 +17,15 @@ public class UserDAO {
     private EntityManager em;
 
     public List<EditorUser> allUsers() {
-        TypedQuery<EditorUser> q = em.createQuery(
-                "SELECT m FROM EditorUser m", EditorUser.class);
-        List<EditorUser> l = q.getResultList();
-        return l;
+         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from EditorUser", EditorUser.class).list();
+        }
 
     }
 
-    public EditorUser getUser(String login) {
-        TypedQuery<EditorUser> q = em.createQuery("SELECT m FROM EditorUser m WHERE m.login = '"+login+"'", EditorUser.class);
-        return q.getSingleResult();
+    public Optional<EditorUser> getUser(String login) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createQuery("from EditorUser where login='"+login+"'", EditorUser.class).uniqueResultOptional();
+        }
     }
 }
