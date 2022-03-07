@@ -13,8 +13,9 @@ define([
 	"dijit/_editor/plugins/AlwaysShowToolbar",
 	"dijit/Dialog", 
 	"dijit/form/ValidationTextBox",
+	"dojo/request",
     "dojo/domReady!"
-], function(dom, on, win, Memory, ObjectStoreModel, Tree, TabContainer, ContentPane, BorderContainer, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu, Toolbar, Button, array, Editor, AlwaysShowToolbar, Dialog, ValidationTextBox){
+], function(dom, on, win, Memory, ObjectStoreModel, Tree, TabContainer, ContentPane, BorderContainer, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu, Toolbar, Button, array, Editor, AlwaysShowToolbar, Dialog, ValidationTextBox, request){
 	var logcont = new ContentPane({title: "Login pane"});
 	var logcontlog = new ContentPane({content: "Login"});
 	var logcontpass = new ContentPane({content: "Password"});
@@ -28,7 +29,13 @@ define([
 	var logbut = new Button({label:"Login"});
 	logcont.addChild(logbut);
 	on(logbut, "click", function(evt){
-		
+		request("request.html").then(function(data){
+			// do something with handled data
+		  }, function(err){
+			// handle an error condition
+		  }, function(evt){
+			// handle a progress event
+		  });
 	});
 	
 	var myDialog = new Dialog({
