@@ -1,6 +1,7 @@
 
-package ru.demskv.webapplicationproject;
+package ru.demskv.webapplicationproject.EditorUser;
 
+import ru.demskv.webapplicationproject.EditorUser.EditorUser;
 import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -9,9 +10,10 @@ import jakarta.persistence.TypedQuery;
 import java.util.List;
 import java.util.Optional;
 import org.hibernate.Session;
+import ru.demskv.webapplicationproject.HibernateUtil;
 
 @Singleton
-public class UserDAO {
+public class EditorUserDAO {
 
     @PersistenceContext
     private EntityManager em;

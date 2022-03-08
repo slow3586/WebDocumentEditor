@@ -1,6 +1,8 @@
 
-package ru.demskv.webapplicationproject;
+package ru.demskv.webapplicationproject.EditorUser;
 
+import ru.demskv.webapplicationproject.EditorUser.EditorUserDAO;
+import ru.demskv.webapplicationproject.EditorUser.EditorUser;
 import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
@@ -21,14 +23,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 @Path("users/")
-public class UserRest {
+public class EditorUserController {
 
     @EJB
-    private UserDAO userDAO;
+    private EditorUserDAO userDAO;
     
     @POST
     @Path("")
-    @Produces(MediaType.TEXT_PLAIN)
+    @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public Response date(
             EditorUser jsonuser) {

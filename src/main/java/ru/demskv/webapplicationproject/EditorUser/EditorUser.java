@@ -1,4 +1,4 @@
-package ru.demskv.webapplicationproject;
+package ru.demskv.webapplicationproject.EditorUser;
 
 
 import java.time.LocalDate;

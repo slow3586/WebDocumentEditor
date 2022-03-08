@@ -1,12 +1,17 @@
 
 package ru.demskv.webapplicationproject;
 
+import ru.demskv.webapplicationproject.EditorUser.EditorUser;
 import java.util.Properties;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.cfg.Environment;
 import org.hibernate.service.ServiceRegistry;
+import ru.demskv.webapplicationproject.assignment.Assignment;
+import ru.demskv.webapplicationproject.employee.Employee;
+import ru.demskv.webapplicationproject.organization.Organization;
+import ru.demskv.webapplicationproject.subdivision.Subdivision;
 
 public class HibernateUtil {
     private static SessionFactory sessionFactory;
@@ -27,6 +32,10 @@ public class HibernateUtil {
                 settings.put(Environment.DEFAULT_SCHEMA, "webdocumenteditor");
                 configuration.setProperties(settings);
                 configuration.addAnnotatedClass(EditorUser.class);
+                configuration.addAnnotatedClass(Assignment.class);
+                configuration.addAnnotatedClass(Employee.class);
+                configuration.addAnnotatedClass(Organization.class);
+                configuration.addAnnotatedClass(Subdivision.class);
                 ServiceRegistry serviceRegistry = new StandardServiceRegistryBuilder()
                     .applySettings(configuration.getProperties()).build();
                 
