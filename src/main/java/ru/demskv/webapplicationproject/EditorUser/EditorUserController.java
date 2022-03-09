@@ -3,7 +3,6 @@ package ru.demskv.webapplicationproject.EditorUser;
 
 import ru.demskv.webapplicationproject.EditorUser.EditorUserDAO;
 import ru.demskv.webapplicationproject.EditorUser.EditorUser;
-import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;

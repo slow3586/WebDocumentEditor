@@ -21,13 +21,15 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import java.time.LocalDateTime;
 import ru.demskv.webapplicationproject.employee.Employee;
 
 
 @Entity
 @Table(name = "assignment")
 @NamedQueries({
-    @NamedQuery(name = "Assignment.findAll", query = "SELECT a FROM Assignment a")})
+    @NamedQuery(name = "Assignment.findAll", query = "SELECT a FROM Assignment a"),
+    @NamedQuery(name = "Assignment.findAllIds", query = "SELECT a.id, a.lastupdated FROM Assignment a")})
 public class Assignment implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -57,6 +59,8 @@ public class Assignment implements Serializable {
     @JoinColumn(name = "author_id", referencedColumnName = "id")
     @ManyToOne(optional = false)
     private Employee author;
+    @Column(name = "lastupdated")
+    private LocalDateTime lastupdated;
 
     public Assignment() {
     }
@@ -133,6 +137,8 @@ public class Assignment implements Serializable {
     public void setAuthor(Employee author) {
         this.author = author;
     }
+    
+    
 
     @Override
     public int hashCode() {
@@ -157,6 +163,14 @@ public class Assignment implements Serializable {
     @Override
     public String toString() {
         return "ru.demskv.webapplicationproject.assignment.Assignment[ id=" + id + " ]";
+    }
+
+    public LocalDateTime getLastupdated() {
+        return lastupdated;
+    }
+
+    public void setLastupdated(LocalDateTime lastupdated) {
+        this.lastupdated = lastupdated;
     }
 
 }

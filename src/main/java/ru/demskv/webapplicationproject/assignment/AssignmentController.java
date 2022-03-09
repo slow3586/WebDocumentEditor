@@ -1,6 +1,7 @@
 
 package ru.demskv.webapplicationproject.assignment;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.ejb.EJB;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
@@ -25,17 +26,25 @@ public class AssignmentController {
     @GET
     @Path("find_all/")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findAll() {
-        return Response.ok().entity(GsonUtil.getInstance().toJson(assignmentService.findAll())).build();
+    public Response findAll() throws JsonProcessingException {
+        return Response.ok().entity(GsonUtil.getInstance().writeValueAsString((assignmentService.findAll()))).build();
+    }
+    
+    @GET
+    @Path("find_all_ids/")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response findAllIds() throws JsonProcessingException {
+        return Response.ok().entity(GsonUtil.getInstance().writeValueAsString((assignmentService.findAllIds()))).build();
     }
     
     @POST
     @Path("find_by_id/{id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response findById(@PathParam("id") @Min(1) Integer id) {
-        return Response.ok().entity(GsonUtil.getInstance().toJson(assignmentService.findById(id))).build();
+    public Response findById(@PathParam("id") @Min(1) Integer id) throws JsonProcessingException {
+        return Response.ok().entity(GsonUtil.getInstance().writeValueAsString((assignmentService.findById(id)))).build();
     }
     
+    /*
     @POST
     @Path("create/")
     @Produces(MediaType.APPLICATION_JSON)
@@ -59,4 +68,5 @@ public class AssignmentController {
     public Response delete(@PathParam("id") @Min(1) Integer id) {
         return Response.ok().entity(GsonUtil.getInstance().toJson(assignmentService.deleteById(id))).build();
     }
+*/
 }

@@ -25,6 +25,5 @@ public class StaticContent {
         return null == resource
                 ? Response.status(Response.Status.NOT_FOUND).build()
                 : Response.ok().entity(resource).build();
-        //return Response.ok().entity(path).build();
     }
 }
