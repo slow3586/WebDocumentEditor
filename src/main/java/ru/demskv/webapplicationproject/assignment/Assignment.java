@@ -29,7 +29,7 @@ import ru.demskv.webapplicationproject.employee.Employee;
 @Table(name = "assignment")
 @NamedQueries({
     @NamedQuery(name = "Assignment.findAll", query = "SELECT a FROM Assignment a"),
-    @NamedQuery(name = "Assignment.findAllIds", query = "SELECT a.id, a.lastupdated FROM Assignment a")})
+    @NamedQuery(name = "Assignment.findAllSlim", query = "SELECT a.id, a.topic, a.author, count(a.executors), a.lastupdated FROM Assignment a")})
 public class Assignment implements Serializable {
 
     private static final long serialVersionUID = 1L;
