@@ -6,7 +6,6 @@ import jakarta.ejb.Singleton;
 import jakarta.ejb.Stateless;
 import java.util.List;
 import java.util.Optional;
-import ru.demskv.webapplicationproject.IdUpdatedTuple;
 
 @Singleton
 public class AssignmentService {
@@ -16,10 +15,6 @@ public class AssignmentService {
         
         public List<Assignment> findAll() {
             return assignmentDAO.findAll();
-        }
-        
-        public List<IdUpdatedTuple> findAllIds() {
-            return assignmentDAO.findAllIds();
         }
         
         public Optional<Assignment> findById(int id) {

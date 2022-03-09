@@ -19,103 +19,153 @@ define([
         'dstore/Rest',
     "dojo/domReady!"
 ], function(dom, on, win, Memory, ObjectStoreModel, Tree, TabContainer, ContentPane, BorderContainer, MenuBar, PopupMenuBarItem, Menu, MenuItem, DropDownMenu, Toolbar, Button, array, Editor, AlwaysShowToolbar, Dialog, ValidationTextBox, request, OnDemandGrid, RequestMemory, Rest){
-    var bc = new BorderContainer({style: "height: 100%; width:100%;", liveSplitters:true, gutter:true});
-	
-    var pMenuBar = new MenuBar({region: "top"});
-    var pSubMenu = new DropDownMenu({});
-    pSubMenu.addChild(new MenuItem({
-        label: "English"
-    }));
-    pSubMenu.addChild(new MenuItem({
-        label: "Russian"
-    }));
-    pMenuBar.addChild(new PopupMenuBarItem({
-        label: "Language",
-        popup: pSubMenu
-    }));
-    bc.addChild(pMenuBar);
-	
-    var tabContainer = new TabContainer({region: "center"});
-    bc.addChild(tabContainer);
-	
-    var myStore = new Memory({
-    data: [
-            { id: 'root', name: 'root', root:true, type:'folder'},
-            { id: 'organizations_root', name:'Organization structure',  parent: 'root', type:'folder'},
-            { id: 'organizations', name:'Organizations',  parent: 'organizations_root', type:'item'},
-            { id: 'employees', name:'Employees',  parent: 'organizations_root', type:'item'},
-            { id: 'assignments_root', name:'Assignments',  parent: 'root', type:'folder'},
-            { id: 'all_assignments', name:'All assignments',  parent: 'assignments_root', type:'item'},
-            { id: 'my_assignments', name:'My assignments',  parent: 'assignments_root', type:'item'},
-            { id: 'for_me_assignments', name:'Assignments for me',   parent: 'assignments_root', type:'item' },
-        ],
-        getIconClass: function( item, opened){
-                return (!item || this.model.mayHaveChildren(item)) ? (opened ? "dijitFolderOpened" : "dijitFolderClosed") : "dijitLeaf"
-        },
-        getChildren: function(object){
-            return this.query({parent: object.id});
-        }
-    });
-    var myModel = new ObjectStoreModel({
-        store: myStore,
-        query: {id: 'root'},
-        mayHaveChildren: function(item){
-            return item.type=='folder';
-        }
-    });
-    var tree = new Tree({
-        model: myModel,
-        region: "left",
-        showRoot: false,
-        onClick: function(item, node, event){
-            console.log(node+" "+item+" "+event);
-        }
-    });
-    bc.addChild(tree);
     
-    var Assignment = function (id, topic, text, executors, author){
-        this.id = id;
-        this.topic = topic;
-        this.text = text;
-        this.executors = executors;
-        this.author = author;
+    function createMainMenuBar(){
+        var menu = new MenuBar({region: "top"});
+        var subMenu = new DropDownMenu({});
+        subMenu.addChild(new MenuItem({
+            label: "English"
+        }));
+        subMenu.addChild(new MenuItem({
+            label: "Russian"
+        }));
+        menu.addChild(new PopupMenuBarItem({
+            label: "Language",
+            popup: subMenu
+        }));
+        return menu;
     };
-
-    Assignment.fromJson = function (json){
-        var obj = JSON.parse (json);
-        return new Assignment (obj.id, obj.topic, obj.text, obj.executors, obj.author);
-    };
- 
-    var griddata = new RequestMemory({ target: 'api/assignment/find_all' });
- 
-    griddata.fetch().forEach(function (object) {
-        //console.log(object);
-    });
-    var grid = new OnDemandGrid({
-        collection: griddata,
-        columns: {
-            id: 'ID',
-            topic: 'Topic'
-        },
-        loadingMessage: 'Loading data...',
-        noDataMessage: 'No results found.'
-    });
-    grid.on('dgrid-error', function(event) {
-        //console.log(event+" "+event.error.message);
-    });
-    grid.on('.dgrid-row:click', function (event) {
-        var row = grid.row(event);
+    
+    function openEditAssignmentTab(row){
+        console.log(JSON.stringify(event));
         console.log('Row clicked:', row);
-        var atab = new ContentPane({title: "Assignment: "+row.data.topic, closable:true});
-        tabContainer.addChild(atab);
-    });
-    grid.on('dgrid-refresh-complete', function(event) {
-        //console.log(event+" "+event.error.message);
-    });
-    var tab1 = new ContentPane({title: "tab 1"});
-    tab1.addChild(grid);
-    tabContainer.addChild(tab1);
-    document.body.appendChild(bc.domNode);
-    bc.startup();
-    grid.startup();
+        var tab = new ContentPane({title: "Assignment: "+row.data.topic, closable:true});
+        var namecp = new ContentPane({content:"Name:"});
+        var nametb = new ValidationTextBox();
+        namecp.addChild(nametb);
+        tab.addChild(namecp);
+        return tab;
+    }
+    
+    function createBorderContainer(){
+        var borderContainer = new BorderContainer({style: "height: 100%; width:100%;", liveSplitters:true, gutter:true});
+        borderContainer.addChild(createMainMenuBar());
+        var tabContainer = new TabContainer({region: "center"});
+        borderContainer.addChild(tabContainer);
+        var tree = createTreeMenu();
+        tree.onClick = function(item, node, event){
+                if(item.id==='all_assignments' && !window.allAssignmentsTabOpen){
+                    var grid = createAllAssignmentsGrid();
+                    
+                    grid.on('.dgrid-row:dblclick', function (event) {
+                        tabContainer.addChild(openEditAssignmentTab(grid.row(event)));
+                    });
+                
+                    let tab = openAllAssignmentsTab();
+                    tab.addChild(grid);
+                    tabContainer.addChild(tab);
+                    grid.startup();
+                }
+                console.log(node+" "+JSON.stringify(item)+" "+event);
+            }
+        borderContainer.addChild(tree);
+        document.body.appendChild(borderContainer.domNode);
+        borderContainer.startup();
+    };
+	
+    function createTreeMenu(){
+        var treeMenuMemory = new Memory({
+            data: [
+                { id: 'root', name: 'root', root:true, type:'folder'},
+                { id: 'organizations_root', name:'Organization structure',  parent: 'root', type:'folder'},
+                { id: 'organizations', name:'Organizations',  parent: 'organizations_root', type:'item'},
+                { id: 'employees', name:'Employees',  parent: 'organizations_root', type:'item'},
+                { id: 'assignments_root', name:'Assignments',  parent: 'root', type:'folder'},
+                { id: 'all_assignments', name:'All assignments',  parent: 'assignments_root', type:'item'},
+                { id: 'my_assignments', name:'My assignments',  parent: 'assignments_root', type:'item'},
+                { id: 'for_me_assignments', name:'Assignments for me',   parent: 'assignments_root', type:'item' },
+            ],
+            getIconClass: function( item, opened){
+                return (!item || this.model.mayHaveChildren(item)) ? (opened ? "dijitFolderOpened" : "dijitFolderClosed") : "dijitLeaf"
+            },
+            getChildren: function(object){
+                return this.query({parent: object.id});
+            }
+        });
+        
+        var treeMenuModel = new ObjectStoreModel({
+            store: treeMenuMemory,
+            query: {id: 'root'},
+            mayHaveChildren: function(item){
+                return item.type==='folder';
+            }
+        });
+        
+        var tree = new Tree({
+            model: treeMenuModel,
+            region: "left",
+            showRoot: false
+        });
+        
+        return tree;
+    }
+        
+    function createGrid(apitarget, gridcolumns){
+        var assignmentData = new RequestMemory({ target: apitarget });
+        var grid = new OnDemandGrid({
+            collection: assignmentData,
+            columns: gridcolumns,
+            loadingMessage: 'Loading data...',
+            noDataMessage: 'No results found.'
+        });
+        return grid;
+    }
+    
+    function createAllAssignmentsGrid(){
+        var grid = createGrid('api/assignment/find_all', [
+                { field: 'id', label: 'ID'},
+                { field: 'topic', label: 'Topic' },
+                { field: 'text', label: 'Text'},
+                { field: 'author', label: 'Author', 
+                    formatter: function (author) {
+                            return author.lastname + " " + author.firstname;
+                    }
+                },
+            ]);
+        return grid;
+    }
+        
+    function openAllAssignmentsTab(){   
+        var tab = new ContentPane({
+            title: "All assignments",
+            onClose: function(){
+                window.allAssignmentsTabOpen = false;
+            }
+        });
+        var addbut = new Button({
+            label: "Add assignment",
+            onClick: function(){
+                console.log("add");
+            }
+        });
+        tab.addChild(addbut);
+        var editbut = new Button({
+            label: "Edit assignment",
+            onClick: function(){
+                console.log("edit");
+            }
+        });
+        tab.addChild(editbut);
+        var delbut = new Button({
+            label: "Delete assignment",
+            onClick: function(){
+                console.log("add");
+            }
+        });
+        tab.addChild(delbut);
+        return tab;
+    }
+    
+    createBorderContainer();
+    
 });

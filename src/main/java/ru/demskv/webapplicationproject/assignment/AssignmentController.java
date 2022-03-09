@@ -30,13 +30,6 @@ public class AssignmentController {
         return Response.ok().entity(GsonUtil.getInstance().writeValueAsString((assignmentService.findAll()))).build();
     }
     
-    @GET
-    @Path("find_all_ids/")
-    @Produces(MediaType.APPLICATION_JSON)
-    public Response findAllIds() throws JsonProcessingException {
-        return Response.ok().entity(GsonUtil.getInstance().writeValueAsString((assignmentService.findAllIds()))).build();
-    }
-    
     @POST
     @Path("find_by_id/{id}")
     @Produces(MediaType.APPLICATION_JSON)

@@ -10,7 +10,6 @@ import org.hibernate.Session;
 import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import ru.demskv.webapplicationproject.HibernateUtil;
-import ru.demskv.webapplicationproject.IdUpdatedTuple;
 
 
 @Singleton
@@ -20,17 +19,6 @@ public class AssignmentDAO {
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
             return session.createNamedQuery("Assignment.findAll", Assignment.class).list();
         }
-    }
-    
-    public List<IdUpdatedTuple> findAllIds() {
-        List<IdUpdatedTuple> returnList = new ArrayList<>();
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            List<Object[]> list = session.createNamedQuery("Assignment.findAllIds").list();
-            for(Object[] item : list){
-                returnList.add(new IdUpdatedTuple((Integer)item[0], (LocalDateTime) item[1]));
-            }
-        }
-        return returnList;
     }
     
     public Optional<Assignment> findLastAddedRow(){
