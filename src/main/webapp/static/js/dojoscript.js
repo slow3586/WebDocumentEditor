@@ -1,5 +1,7 @@
 define([
         "dojo/_base/kernel",
+        'dojo/_base/declare',
+        "dojo/dom-class",
         "dojo/dom", 
         "dojo/on", 
         "dojo/_base/window", 
@@ -20,14 +22,23 @@ define([
         "dijit/Editor",
         "dijit/_editor/plugins/AlwaysShowToolbar",
         "dijit/Dialog", 
+        "dijit/form/TextBox",
         "dijit/form/ValidationTextBox",
         "dojo/request",
         'dgrid/OnDemandGrid',
         'dstore/RequestMemory',
         'dstore/Rest',
+        'dstore/SimpleQuery',
+        'dstore/Trackable',
+        "dijit/form/Textarea",
+        'dgrid/Selection',
+        'dgrid/Grid',
+        'dgrid/extensions/Pagination',
         "dojo/domReady!"
 ], function(
         kernel, 
+        declare,
+        domClass,
         dom, 
         on, 
         win,
@@ -48,11 +59,18 @@ define([
         Editor,
         AlwaysShowToolbar,
         Dialog, 
+        TextBox,
         ValidationTextBox,
         request, 
         OnDemandGrid, 
         RequestMemory, 
-        Rest
+        Rest,
+        SimpleQuery,
+        Trackable,
+        TextArea,
+        Selection,
+        Grid,
+        Pagination
 ){
 
     function createBorderContainer(){
@@ -150,81 +168,158 @@ define([
             }
         });
         tab.addChild(new Button({
-            label: "Add assignment",
-            onClick: function(){openEditAssignmentTab()}
+            label: "Add",
+            onClick: function(){openEditAssignmentTab(false)}
         }));
         tab.addChild(new Button({
-            label: "Edit assignment",
-            onClick: function(){openEditAssignmentTab()}
+            label: "Edit",
+            onClick: function(){openEditAssignmentTab(true)}
         }));
         tab.addChild(new Button({
-            label: "Delete assignment",
-            onClick: function(){openEditAssignmentTab()}
+            label: "Delete",
+            onClick: function(){openDeleteAssignmentDialog()}
+        }));
+        var grid = createAllAssignmentsGrid();
+        tab.addChild(new Button({
+            label: "Update",
+            onClick: function(){
+                kernel.global.allAssignmentsGrid.refresh();
+                kernel.global.allAssignmentsGrid.startup();
+                console.log(JSON.stringify(kernel.global.allAssignmentsGrid.collection));
+            }
         }));
         
-        var grid = createAllAssignmentsGrid();
-        grid.on('.dgrid-row:click', function (event) {
-            kernel.global.mainTabContainerSelectedRow = grid.row(event);
-        });
-        grid.on('.dgrid-row:dblclick', function (event) {
-            openEditAssignmentTab(grid.row(event));
-        });
+        
         tab.addChild(grid);
         kernel.global.mainTabContainer.addChild(tab);
-        
         grid.startup();
+        kernel.global.allAssignmentsTabOpen = true;
     }
     
     function openDeleteAssignmentDialog(){
         if(kernel.global.mainTabContainerSelectedRow===undefined) return;
+        
+        var dialog = new Dialog({
+            title: "Delete assignment "+kernel.global.mainTabContainerSelectedRow.data.topic,
+            content: "Are you sure you want to delete "+kernel.global.mainTabContainerSelectedRow.data.topic+"?"
+        });
+        dialog.addChild(new Button({
+            label: "Yes",
+            onClick: function(){
+                
+                dialog.hide();
+            }
+        }));
+        dialog.addChild(new Button({
+            label: "Cancel",
+            onClick: function(){
+                dialog.hide();
+            }
+        }));
+        
+        dialog.show();
     }
-
-    function openEditAssignmentTab(row){
-        if(row===undefined){
-            if(kernel.global.mainTabContainerSelectedRow===undefined) return;
-            row = kernel.global.mainTabContainerSelectedRow;
-        }
-        var tab = new ContentPane({title: "Edit assignment: "+row.data.topic, closable:true});
+    
+    function openEditAssignmentTab(isEditing){
+        var tab = new ContentPane({title: "New assignment", closable:true});
+        
+        var tbid = new TextBox({value:"0", disabled:"true"});
         
         var cp = new ContentPane({content:"Topic:"});
-        var tb = new TextBox();
-        cp.addChild(tb);
+        var tbtopic = new TextBox();
+        cp.addChild(tbtopic);
+        tab.addChild(cp);
+    
+        var tbauthor_id = new TextBox({disabled:"true"});
+    
+        cp = new ContentPane({content:"Author:"});
+        var tbauthor = new TextBox({disabled:"true"});
+        cp.addChild(tbauthor);
         tab.addChild(cp);
         
-        var cp = new ContentPane({content:"Text:"});
-        var tb = new TextBox();
-        cp.addChild(tb);
+        cp = new ContentPane({content:"Text:"});
+        var tbtext = new TextArea();
+        domClass.add(tbtext.domNode, "bigTextBox");
+        cp.addChild(tbtext);
         tab.addChild(cp);
         
-        var cp = new ContentPane({content:"Text:"});
-        var tb = new TextBox();
-        cp.addChild(tb);
-        tab.addChild(cp);
+        if(isEditing){
+            var row = kernel.global.allAssignmentsGridSelectedRow;
+            tbid.set("value", row.data.id);
+            tbtopic.set("value", row.data.topic);
+            tbtext.set("value", row.data.text);
+            tbauthor.set("value", row.data.author_id);
+            tbauthor_id.set("value", row.data.author_id);
+            tab.set("title", "Edit assignment: "+row.data.topic);
+        }
         
         tab.addChild(new Button({
-            label: "Save",
-            onClick: function(){}
+            label: isEditing ? "Save" : "Create",
+            onClick: function(){
+                var adata = {
+                            id: tbid.get("value"),
+                            topic: tbtopic.get("value"),
+                            text: tbtext.get("value"),
+                            author_id: tbauthor_id.get("value")
+                        };
+                console.log(JSON.stringify(adata));
+                require(["dojo/request"], function(request){
+                    request.post(isEditing ? "api/assignment/update" : "api/assignment/create", {
+                        handleAs: "json",
+                        data: JSON.stringify(adata),
+                        headers: {
+                            "Content-Type": 'application/json; charset=utf-8',
+                            "Accept": "application/json"
+                        }
+                    }).then(
+                        
+                    );
+                });
+            }
         }));
         
         kernel.global.mainTabContainer.addChild(tab);
     }
     
     function createAllAssignmentsGrid(){
-        var assignmentData = new RequestMemory({ target: 'api/assignment/find_all' });
-        var grid = new OnDemandGrid({
+        var TrackableRest = declare([Rest, SimpleQuery, Trackable]);
+        var assignmentData = new TrackableRest({ target: 'api/assignment/find_all' });
+        //var assignmentData = new RequestMemory({ target: 'api/assignment/find_all' });
+        kernel.global.allAssignmentsGrid = new (declare([ Grid, Pagination ]))({
             collection: assignmentData,
+            selectionMode: 'single',
+            /*
+            maxRowsPerPage: 10,
+            minRowsPerPage: 10,
+            bufferRows: 10,
+            pagingDelay: 100,
+            keepScrollPosition: 'true',
+             * */
+            pagingLinks: 1,
+            pagingTextBox: true,
+            firstLastArrows: true,
+            pageSizeOptions: [10, 15, 25],
             columns: [{ field: 'id', label: 'ID'},
                 { field: 'topic', label: 'Topic' },
                 { field: 'text', label: 'Text'},
-                { field: 'author', label: 'Author', 
+                { field: 'author_id', label: 'Author', 
                     formatter: function (author) {
-                            return author.lastname + " " + author.firstname;
+                            return author;
                     }
                 }],
             loadingMessage: 'Loading data...',
             noDataMessage: 'No results found.'
         });
-        return grid;
+        kernel.global.allAssignmentsGrid.on('dgrid-select', function (event) {
+            kernel.global.allAssignmentsGridSelectedRow = kernel.global.allAssignmentsGrid.row(event.rows[0]);
+        });
+        kernel.global.allAssignmentsGrid.on('dgrid-deselect', function (event) {
+            kernel.global.allAssignmentsGridSelectedRow = undefined;
+        });
+        kernel.global.allAssignmentsGrid.on('.dgrid-row:dblclick', function (event) {
+            openEditAssignmentTab(kernel.global.allAssignmentsGrid.row(event));
+        });
+        return kernel.global.allAssignmentsGrid;
     }
       
     createBorderContainer();

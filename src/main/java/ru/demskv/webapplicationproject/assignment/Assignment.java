@@ -21,6 +21,7 @@ import jakarta.persistence.NamedQuery;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import ru.demskv.webapplicationproject.employee.Employee;
 
@@ -29,7 +30,8 @@ import ru.demskv.webapplicationproject.employee.Employee;
 @Table(name = "assignment")
 @NamedQueries({
     @NamedQuery(name = "Assignment.findAll", query = "SELECT a FROM Assignment a"),
-    @NamedQuery(name = "Assignment.findAllSlim", query = "SELECT a.id, a.topic, a.author, count(a.executors), a.lastupdated FROM Assignment a")})
+    @NamedQuery(name = "Assignment.findAllOrder", query = "SELECT a FROM Assignment a ORDER BY :columnName"),
+    @NamedQuery(name = "Assignment.deleteById", query = "DELETE FROM Assignment WHERE id=:id")})
 public class Assignment implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -40,7 +42,7 @@ public class Assignment implements Serializable {
     private Integer id;
     @Basic(optional = false)
     @Column(name = "topic")
-    private String topic;
+    private String topic;   
     @Column(name = "executeby")
     @Temporal(TemporalType.TIMESTAMP)
     private Date executeby;
@@ -51,16 +53,19 @@ public class Assignment implements Serializable {
     @Lob
     @Column(name = "text")
     private String text;
+    /*
     @JoinTable(name = "assignment_employee_executor", joinColumns = {
         @JoinColumn(name = "assignment_id", referencedColumnName = "id")}, inverseJoinColumns = {
         @JoinColumn(name = "employee_id", referencedColumnName = "id")})
     @ManyToMany(fetch = FetchType.EAGER)
     private Collection<Employee> executors;
-    @JoinColumn(name = "author_id", referencedColumnName = "id")
+    @JoinColumn(name = "author_id", referencedColumnName = "id",  insertable=false, updatable=false)
     @ManyToOne(optional = false)
     private Employee author;
-    @Column(name = "lastupdated")
-    private LocalDateTime lastupdated;
+    */
+    @NotNull
+    @Column(name = "author_id")
+    private Integer author_id;
 
     public Assignment() {
     }
@@ -121,7 +126,7 @@ public class Assignment implements Serializable {
     public void setText(String text) {
         this.text = text;
     }
-
+/*
     public Collection<Employee> getExecutors() {
         return executors;
     }
@@ -137,7 +142,14 @@ public class Assignment implements Serializable {
     public void setAuthor(Employee author) {
         this.author = author;
     }
-    
+*/
+    public Integer getAuthor_id() {
+        return author_id;
+    }
+
+    public void setAuthor_id(Integer author_id) {
+        this.author_id = author_id;
+    }
     
 
     @Override
@@ -163,14 +175,6 @@ public class Assignment implements Serializable {
     @Override
     public String toString() {
         return "ru.demskv.webapplicationproject.assignment.Assignment[ id=" + id + " ]";
-    }
-
-    public LocalDateTime getLastupdated() {
-        return lastupdated;
-    }
-
-    public void setLastupdated(LocalDateTime lastupdated) {
-        this.lastupdated = lastupdated;
     }
 
 }

@@ -20,3 +20,14 @@ html, body, #mainDiv {
 .dijitButton{
     margin: 8px;
 }
+
+.bigTextBox{
+    width:90%;
+    min-width:100px;
+    max-width:500px;
+    min-height:100px;
+}
+
+.dijitTextBox{
+    margin-left:8px;
+}

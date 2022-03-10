@@ -2,6 +2,8 @@
 package ru.demskv.webapplicationproject.assignment;
 
 import jakarta.ejb.Singleton;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +17,27 @@ import ru.demskv.webapplicationproject.HibernateUtil;
 @Singleton
 public class AssignmentDAO {
 
-    public List<Assignment> findAll() {
+    @PersistenceContext
+    EntityManager entityManager;
+    
+    public List<Assignment> findAll(int from, int limit) {
+        return entityManager.createNamedQuery("Assignment.findAll", Assignment.class).setFirstResult(0).setMaxResults(10).getResultList();
+        /*
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createNamedQuery("Assignment.findAll", Assignment.class).list();
+            return session.createNamedQuery("Assignment.findAll", Assignment.class).setFirstResult(0).setMaxResults(10).list();
+        }
+        */
+    }
+    
+    public List<Assignment> findAllOrder(int from, int limit, String columnName) {
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            return session.createNamedQuery("Assignment.findAllOrder", Assignment.class).setParameter(0, columnName).setFirstResult(from).setMaxResults(limit).list();
         }
     }
     
     public Optional<Assignment> findLastAddedRow(){
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query query = session.createQuery("from assignment order by id DESC", Assignment.class);
+            Query query = session.createQuery("SELECT a FROM Assignment a order by a.id DESC", Assignment.class);
             query.setMaxResults(1);
             return query.uniqueResultOptional();
         }
@@ -38,7 +52,7 @@ public class AssignmentDAO {
     public Optional<Assignment> create(Assignment assignment){    
         Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            session.beginTransaction();
+            tx = session.beginTransaction();
             session.save(assignment);
             session.flush();
             session.getTransaction().commit();
@@ -50,18 +64,29 @@ public class AssignmentDAO {
         return findLastAddedRow();
     }
     
-    public Assignment update(Assignment assignment){
+    public Assignment update(Assignment newAss){
+        Transaction tx = null;
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            session.load(Assignment.class, assignment.getId());
-            session.update(assignment);
-            return assignment;
+            tx = session.beginTransaction();
+            Assignment oldAss = session.get(Assignment.class, newAss.getId());
+            oldAss.setText(newAss.getText());
+            oldAss.setTopic(newAss.getTopic());
+            session.update(oldAss);
+            session.flush();
+            session.getTransaction().commit();
+            return oldAss;
+        } catch (Exception e){
+            if(tx!=null && tx.getStatus().canRollback())
+                tx.rollback();
+            throw e;
         }
     }
     
-    public boolean delete(Assignment assignment){
+    public int deleteById(int id){
         try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            session.delete(assignment);
-            return true;
+            Query q = session.createNamedQuery("Assignment.deleteById").setParameter(0, id);
+            int d = q.executeUpdate();
+            return d;
         }
     }
 }

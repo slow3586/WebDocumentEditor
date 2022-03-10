@@ -5,7 +5,7 @@
     <artifactId>WebApplicationProject-ejb</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>war</packaging>
-    <name>WebApplicationProject-ejb-1.0-SNAPSHOT</name>
+    <name>WebApplicationProject-ejb</name>
     
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>

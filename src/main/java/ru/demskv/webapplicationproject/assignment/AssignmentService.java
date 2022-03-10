@@ -13,8 +13,16 @@ public class AssignmentService {
         @EJB
         AssignmentDAO assignmentDAO;
         
-        public List<Assignment> findAll() {
-            return assignmentDAO.findAll();
+         public List<Assignment> findAll() {
+            return assignmentDAO.findAll(0, 100);
+        }
+        
+        public List<Assignment> findAll(int from, int limit) {
+            return assignmentDAO.findAll(from, limit);
+        }
+        
+        public List<Assignment> findAllOrder(int from, int limit, String columnName) {
+            return assignmentDAO.findAllOrder(from, limit, columnName);
         }
         
         public Optional<Assignment> findById(int id) {
@@ -29,7 +37,7 @@ public class AssignmentService {
             return assignmentDAO.update(assignment);
         }
         
-        public boolean deleteById(int id){
-            return assignmentDAO.delete(findById(id).get());
+        public int deleteById(int id){
+            return assignmentDAO.deleteById(id);
         }
 }
