@@ -4,6 +4,11 @@ package ru.demskv.webapplicationproject.assignment;
 import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Root;
+import jakarta.transaction.Transactional;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,33 +25,24 @@ public class AssignmentDAO {
     @PersistenceContext
     EntityManager entityManager;
     
-    public List<Assignment> findAll(int from, int limit) {
-        return entityManager.createNamedQuery("Assignment.findAll", Assignment.class).setFirstResult(0).setMaxResults(10).getResultList();
+    public Long countAll() {
+        return entityManager.createNamedQuery("Assignment.countAll", Long.class).getSingleResult();
+    }
+    
+    public List<Assignment> findAll(int from, int limit, String orderBy, boolean desc) {
         /*
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createNamedQuery("Assignment.findAll", Assignment.class).setFirstResult(0).setMaxResults(10).list();
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Assignment> cr = cb.createQuery(Assignment.class);
+        Root<Assignment> root = cr.from(Assignment.class);
+        if(orderBy!=null){
+            if(desc)
         }
-        */
-    }
-    
-    public List<Assignment> findAllOrder(int from, int limit, String columnName) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createNamedQuery("Assignment.findAllOrder", Assignment.class).setParameter(0, columnName).setFirstResult(from).setMaxResults(limit).list();
-        }
-    }
-    
-    public Optional<Assignment> findLastAddedRow(){
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query query = session.createQuery("SELECT a FROM Assignment a order by a.id DESC", Assignment.class);
-            query.setMaxResults(1);
-            return query.uniqueResultOptional();
-        }
-    }
-
-    public Optional<Assignment> findById(int id) {
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            return session.createNamedQuery("findById", Assignment.class).setParameter(0, id).uniqueResultOptional();
-        }
+        cr.orderBy(cb.desc(root.get(orderBy)));
+        cr.select(root);
+        return entityManager.createQuery(cr).setFirstResult(from).setMaxResults(limit).getResultList();
+*/
+        String namedQueryName = desc ? "Assignment.findAllDesc" : "Assignment.findAllAsc";
+        return entityManager.createNamedQuery(namedQueryName, Assignment.class).setParameter("columnName", orderBy).setFirstResult(from).setMaxResults(limit).getResultList();        
     }
     
     public Optional<Assignment> create(Assignment assignment){    
@@ -83,11 +79,10 @@ public class AssignmentDAO {
     }
     
     public int deleteById(int id){
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            Query q = session.createNamedQuery("Assignment.deleteById").setParameter(0, id);
-            int d = q.executeUpdate();
-            return d;
-        }
+        entityManager.getTransaction().begin();
+        int executeUpdate = entityManager.createNamedQuery("Assignment.deleteById").setParameter("id", id).executeUpdate();
+        entityManager.getTransaction().commit();
+        return executeUpdate;
     }
 }
 

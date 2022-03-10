@@ -184,8 +184,6 @@ define([
             label: "Update",
             onClick: function(){
                 kernel.global.allAssignmentsGrid.refresh();
-                kernel.global.allAssignmentsGrid.startup();
-                console.log(JSON.stringify(kernel.global.allAssignmentsGrid.collection));
             }
         }));
         
@@ -197,16 +195,16 @@ define([
     }
     
     function openDeleteAssignmentDialog(){
-        if(kernel.global.mainTabContainerSelectedRow===undefined) return;
+        if(kernel.global.allAssignmentsGridSelectedRow===undefined) return;
         
         var dialog = new Dialog({
-            title: "Delete assignment "+kernel.global.mainTabContainerSelectedRow.data.topic,
-            content: "Are you sure you want to delete "+kernel.global.mainTabContainerSelectedRow.data.topic+"?"
+            title: "Delete assignment "+kernel.global.allAssignmentsGridSelectedRow.data.topic,
+            content: "Are you sure you want to delete "+kernel.global.allAssignmentsGridSelectedRow.data.topic+"?"
         });
         dialog.addChild(new Button({
             label: "Yes",
             onClick: function(){
-                
+                kernel.global.allAssignmentsGrid.collection.remove(kernel.global.allAssignmentsGridSelectedRow.data.id);
                 dialog.hide();
             }
         }));
@@ -257,24 +255,12 @@ define([
             label: isEditing ? "Save" : "Create",
             onClick: function(){
                 var adata = {
-                            id: tbid.get("value"),
                             topic: tbtopic.get("value"),
                             text: tbtext.get("value"),
-                            author_id: tbauthor_id.get("value")
+                            author_id: "1"//tbauthor_id.get("value")
                         };
-                console.log(JSON.stringify(adata));
-                require(["dojo/request"], function(request){
-                    request.post(isEditing ? "api/assignment/update" : "api/assignment/create", {
-                        handleAs: "json",
-                        data: JSON.stringify(adata),
-                        headers: {
-                            "Content-Type": 'application/json; charset=utf-8',
-                            "Accept": "application/json"
-                        }
-                    }).then(
-                        
-                    );
-                });
+                if(isEditing) { adata.id = tbid.get("value"); }
+                kernel.global.allAssignmentsGrid.collection.add(adata);
             }
         }));
         
@@ -283,22 +269,43 @@ define([
     
     function createAllAssignmentsGrid(){
         var TrackableRest = declare([Rest, SimpleQuery, Trackable]);
-        var assignmentData = new TrackableRest({ target: 'api/assignment/find_all' });
+        var assignmentData = new TrackableRest({ 
+            target: 'api/assignments', 
+            sortParam: "order_by",
+            rangeStartParam: "from",
+            rangeCountParam: "limit"
+        });
+        
+        var filterQuery = function(item, index, items) {
+            var filterString = filter ? filter.get("value") + "" : "";
+
+            // early exists
+            if (filterString.length < 2) return true;
+            if (!item.Name) return false;
+
+            // compare
+            var name = (item.Name + "").toLowerCase();
+            if (~name.indexOf(filterString.toLowerCase())) { return true;}
+
+            return false;
+        };
+        
         //var assignmentData = new RequestMemory({ target: 'api/assignment/find_all' });
-        kernel.global.allAssignmentsGrid = new (declare([ Grid, Pagination ]))({
+        kernel.global.allAssignmentsGrid = new (declare([ Grid, Pagination, Selection ]))({
             collection: assignmentData,
             selectionMode: 'single',
+            query: filterQuery,
             /*
             maxRowsPerPage: 10,
             minRowsPerPage: 10,
             bufferRows: 10,
             pagingDelay: 100,
-            keepScrollPosition: 'true',
              * */
+            keepScrollPosition: 'true',
             pagingLinks: 1,
             pagingTextBox: true,
             firstLastArrows: true,
-            pageSizeOptions: [10, 15, 25],
+            pageSizeOptions: [10, 20, 30, 40, 50],
             columns: [{ field: 'id', label: 'ID'},
                 { field: 'topic', label: 'Topic' },
                 { field: 'text', label: 'Text'},
@@ -317,7 +324,7 @@ define([
             kernel.global.allAssignmentsGridSelectedRow = undefined;
         });
         kernel.global.allAssignmentsGrid.on('.dgrid-row:dblclick', function (event) {
-            openEditAssignmentTab(kernel.global.allAssignmentsGrid.row(event));
+            openEditAssignmentTab(true);
         });
         return kernel.global.allAssignmentsGrid;
     }

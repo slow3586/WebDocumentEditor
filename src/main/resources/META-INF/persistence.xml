@@ -5,9 +5,10 @@
     <jta-data-source>jdbc/wde_mysql</jta-data-source>
     <class>ru.demskv.webapplicationproject.Assignment</class>
     <properties>
+        <property name="hibernate.transaction.jta.platform" value="org.hibernate.service.jta.platform.internal.SunOneJtaPlatform"/>
       <property name="hibernate.connection.driver_class" value="com.mysql.cj.jdbc.Driver"/>
       <property name="hibernate.connection.password" value="root"/>
-      <property name="hibernate.connection.url" value="jdbc:mysql://localhost:3306/webdocumenteditor?useSSL=false"/>
+      <property name="hibernate.connection.url" value="jdbc/wde_mysql"/>
       <property name="hibernate.connection.username" value="root"/>
       <property name="hibernate.default_schema" value="webdocumenteditor"/>
       <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5Dialect"/>
