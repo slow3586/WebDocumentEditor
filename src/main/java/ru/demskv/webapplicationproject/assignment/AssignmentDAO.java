@@ -13,9 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import org.hibernate.Session;
-import org.hibernate.Transaction;
-import org.hibernate.query.Query;
 import ru.demskv.webapplicationproject.HibernateUtil;
 
 
@@ -30,59 +27,40 @@ public class AssignmentDAO {
     }
     
     public List<Assignment> findAll(int from, int limit, String orderBy, boolean desc) {
-        /*
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Assignment> cr = cb.createQuery(Assignment.class);
-        Root<Assignment> root = cr.from(Assignment.class);
-        if(orderBy!=null){
-            if(desc)
-        }
-        cr.orderBy(cb.desc(root.get(orderBy)));
-        cr.select(root);
-        return entityManager.createQuery(cr).setFirstResult(from).setMaxResults(limit).getResultList();
-*/
-        String namedQueryName = desc ? "Assignment.findAllDesc" : "Assignment.findAllAsc";
-        return entityManager.createNamedQuery(namedQueryName, Assignment.class).setParameter("columnName", orderBy).setFirstResult(from).setMaxResults(limit).getResultList();        
+        CriteriaQuery<Assignment> cq = cb.createQuery(Assignment.class);
+        Root<Assignment> root = cq.from(Assignment.class);
+        if(desc)
+            cq.orderBy(cb.desc(root.get(orderBy)));
+        else
+            cq.orderBy(cb.asc(root.get(orderBy)));
+        cq.select(root);
+        return entityManager.createQuery(cq).setFirstResult(from).setMaxResults(limit).getResultList();
+        //String namedQueryName = desc ? "Assignment.findAllDesc" : "Assignment.findAllAsc";
+        //System.out.println(from+" "+limit+" "+orderBy+" "+desc);
+        //return entityManager.createNamedQuery(namedQueryName, Assignment.class).setParameter("columnName", orderBy).setFirstResult(from).setMaxResults(limit).getResultList();        
     }
     
-    public Optional<Assignment> create(Assignment assignment){    
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            session.save(assignment);
-            session.flush();
-            session.getTransaction().commit();
-        } catch (Exception e){
-            if(tx!=null && tx.getStatus().canRollback())
-                tx.rollback();
-            throw e;
-        }
-        return findLastAddedRow();
+    public Optional<Assignment> findById(int id) {
+        return Optional.of(entityManager.createNamedQuery("Assignment.findById", Assignment.class).setParameter("id", id).getSingleResult());
     }
     
-    public Assignment update(Assignment newAss){
-        Transaction tx = null;
-        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
-            tx = session.beginTransaction();
-            Assignment oldAss = session.get(Assignment.class, newAss.getId());
-            oldAss.setText(newAss.getText());
-            oldAss.setTopic(newAss.getTopic());
-            session.update(oldAss);
-            session.flush();
-            session.getTransaction().commit();
-            return oldAss;
-        } catch (Exception e){
-            if(tx!=null && tx.getStatus().canRollback())
-                tx.rollback();
-            throw e;
-        }
+    public void create(Assignment assignment){    
+        entityManager.getTransaction().begin();
+        entityManager.persist(assignment);
+        entityManager.getTransaction().commit();
     }
     
-    public int deleteById(int id){
+    public void update(Assignment assignment){
+        entityManager.getTransaction().begin();
+        entityManager.merge(assignment);
+        entityManager.getTransaction().commit();
+    }
+    
+    public void deleteById(int id){
         entityManager.getTransaction().begin();
         int executeUpdate = entityManager.createNamedQuery("Assignment.deleteById").setParameter("id", id).executeUpdate();
         entityManager.getTransaction().commit();
-        return executeUpdate;
     }
 }
 

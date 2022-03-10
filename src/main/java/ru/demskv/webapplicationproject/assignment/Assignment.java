@@ -29,7 +29,8 @@ import ru.demskv.webapplicationproject.employee.Employee;
 @Entity
 @Table(name = "assignment")
 @NamedQueries({
-    @NamedQuery(name = "Assignment.findAll", query = "SELECT a FROM Assignment a ORDER BY :columnName DESC"),
+    @NamedQuery(name = "Assignment.findAllDesc", query = "SELECT a FROM Assignment a ORDER BY :columnName DESC"),
+    @NamedQuery(name = "Assignment.findAllAsc", query = "SELECT a FROM Assignment a ORDER BY :columnName ASC"),
     @NamedQuery(name = "Assignment.countAll", query = "SELECT count(a) FROM Assignment a"),
     @NamedQuery(name = "Assignment.deleteById", query = "DELETE FROM Assignment WHERE id=:id")})
 public class Assignment implements Serializable {

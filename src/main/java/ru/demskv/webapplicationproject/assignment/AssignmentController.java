@@ -36,9 +36,15 @@ public class AssignmentController {
     public Response get(
             @Min(0) @QueryParam("from") int from,
             @Min(1) @Max(50) @QueryParam("limit") int limit,
-            @QueryParam("orderBy") String orderBy
+            @QueryParam("order_by") String orderBy
     ) {
-        return Response.ok().header("Content-Range", "items "+from+"-"+(from+limit)+"/"+assignmentService.countAll()).entity(GsonUtil.tojson((assignmentService.findAll(from, limit)))).build();
+        boolean orderDesc = false;
+        String columnName = "id";
+        if(orderBy!=null && !orderBy.isBlank()){
+            orderDesc = !orderBy.substring(0, 1).equals("-");
+            columnName = orderBy.substring(1);
+        }
+        return Response.ok().header("Content-Range", "items "+from+"-"+(from+limit)+"/"+assignmentService.countAll()).entity(GsonUtil.tojson((assignmentService.findAll(from, limit, columnName, orderDesc)))).build();
     }
     
     @POST
@@ -53,13 +59,15 @@ public class AssignmentController {
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response put(@Valid Assignment assignment) {
-        return Response.ok().entity(GsonUtil.tojson(assignmentService.update(assignment))).build();
+        assignmentService.update(assignment);
+        return Response.ok().entity("OK").build();
     }
     
     @DELETE
     @Path("{id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response delete(@PathParam("id") @Min(1) Integer id) {
-        return Response.ok().entity(GsonUtil.tojson(assignmentService.deleteById(id))).build();
+        assignmentService.deleteById(id);
+        return Response.ok().entity("OK").build();
     }
 }

@@ -34,6 +34,7 @@ define([
         'dgrid/Selection',
         'dgrid/Grid',
         'dgrid/extensions/Pagination',
+        "dijit/form/ComboBox",
         "dojo/domReady!"
 ], function(
         kernel, 
@@ -70,7 +71,8 @@ define([
         TextArea,
         Selection,
         Grid,
-        Pagination
+        Pagination,
+        ComboBox
 ){
 
     function createBorderContainer(){
@@ -186,6 +188,10 @@ define([
                 kernel.global.allAssignmentsGrid.refresh();
             }
         }));
+        var searchtb = new TextBox({
+            label: "Search"
+        });
+        tab.addChild(searchtb);
         
         
         tab.addChild(grid);

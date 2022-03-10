@@ -15,7 +15,7 @@ public class AssignmentService {
         AssignmentDAO assignmentDAO;
         
         public List<Assignment> findAll() {
-            return assignmentDAO.findAll(0, 100, "id", true);
+            return assignmentDAO.findAll(0, 50, "id", true);
         }
          
          public Long countAll() {
@@ -36,15 +36,15 @@ public class AssignmentService {
             return assignmentDAO.findById(id);
         }
         
-        public Optional<Assignment> create(Assignment assignment){
-            return assignmentDAO.create(assignment);
+        public void create(Assignment assignment){
+            assignmentDAO.create(assignment);
         }
         
-        public Assignment update(Assignment assignment){
-            return assignmentDAO.update(assignment);
+        public void update(Assignment assignment){
+            assignmentDAO.update(assignment);
         }
         
-        public int deleteById(int id){
-            return assignmentDAO.deleteById(id);
+        public void deleteById(int id){
+            assignmentDAO.deleteById(id);
         }
 }
