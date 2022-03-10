@@ -13,23 +13,14 @@ public class AssignmentService {
 
         @EJB
         AssignmentDAO assignmentDAO;
-        
-        public List<Assignment> findAll() {
-            return assignmentDAO.findAll(0, 50, "id", true);
-        }
-         
+                 
          public Long countAll() {
             return assignmentDAO.countAll();
-        }
+         }
         
-        public List<Assignment> findAll(int from, int limit) {
+        public List<Assignment> findAll(int from, int limit, String columnName, boolean desc, Integer filterId) {
             if(limit<=0) limit=1;
-            return assignmentDAO.findAll(from, limit, "id", true);
-        }
-        
-        public List<Assignment> findAll(int from, int limit, String columnName, boolean desc) {
-            if(limit<=0) limit=1;
-            return assignmentDAO.findAll(from, limit, columnName, desc);
+            return assignmentDAO.findAll(from, limit, columnName, desc, filterId);
         }
         
         public Optional<Assignment> findById(int id) {

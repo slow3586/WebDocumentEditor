@@ -36,7 +36,11 @@ public class AssignmentController {
     public Response get(
             @Min(0) @QueryParam("from") int from,
             @Min(1) @Max(50) @QueryParam("limit") int limit,
-            @QueryParam("order_by") String orderBy
+            @QueryParam("order_by") String orderBy,
+            @QueryParam("id") Integer filterId,
+            @QueryParam("topic") String filterTopic,
+            @QueryParam("text") String filterText,
+            @QueryParam("author") String filterAuthor
     ) {
         boolean orderDesc = false;
         String columnName = "id";
@@ -44,7 +48,10 @@ public class AssignmentController {
             orderDesc = !orderBy.substring(0, 1).equals("-");
             columnName = orderBy.substring(1);
         }
-        return Response.ok().header("Content-Range", "items "+from+"-"+(from+limit)+"/"+assignmentService.countAll()).entity(GsonUtil.tojson((assignmentService.findAll(from, limit, columnName, orderDesc)))).build();
+        return Response.ok()
+                .header("Content-Range", "items "+from+"-"+(from+limit)+"/"+assignmentService.countAll())
+                .entity(GsonUtil.tojson((assignmentService.findAll(from, limit, columnName, orderDesc, filterId))))
+                .build();
     }
     
     @POST

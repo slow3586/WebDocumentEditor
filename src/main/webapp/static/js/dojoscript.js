@@ -34,7 +34,7 @@ define([
         'dgrid/Selection',
         'dgrid/Grid',
         'dgrid/extensions/Pagination',
-        "dijit/form/ComboBox",
+        "dijit/form/Select",
         "dojo/domReady!"
 ], function(
         kernel, 
@@ -72,7 +72,7 @@ define([
         Selection,
         Grid,
         Pagination,
-        ComboBox
+        Select
 ){
 
     function createBorderContainer(){
@@ -188,11 +188,31 @@ define([
                 kernel.global.allAssignmentsGrid.refresh();
             }
         }));
+        
+        var searchoptcb = new Select({
+            options: [
+                    {label:"Hi0", value:"Al", selected:true},
+                    {label:"Hi1", value:"Al1"}
+                ],
+            value: "id",
+            onChange: function(newValue){
+                console.log(newValue);
+            }
+        });
+        tab.addChild(searchoptcb);
         var searchtb = new TextBox({
-            label: "Search"
+            label: "Search",
+            onChange: function(newValue){
+                console.log(newValue);
+            },
+            onKeyUp: function(event){
+                console.log("ku "+searchtb.get("value"));
+                kernel.global.allAssignmentsGrid.set("collection",
+                    kernel.global.assAssignmentsData.filter({'id':searchtb.get("value")})
+                );
+            }
         });
         tab.addChild(searchtb);
-        
         
         tab.addChild(grid);
         kernel.global.mainTabContainer.addChild(tab);
@@ -275,7 +295,7 @@ define([
     
     function createAllAssignmentsGrid(){
         var TrackableRest = declare([Rest, SimpleQuery, Trackable]);
-        var assignmentData = new TrackableRest({ 
+        kernel.global.assAssignmentsData = new TrackableRest({ 
             target: 'api/assignments', 
             sortParam: "order_by",
             rangeStartParam: "from",
@@ -298,9 +318,8 @@ define([
         
         //var assignmentData = new RequestMemory({ target: 'api/assignment/find_all' });
         kernel.global.allAssignmentsGrid = new (declare([ Grid, Pagination, Selection ]))({
-            collection: assignmentData,
+            collection: kernel.global.assAssignmentsData,
             selectionMode: 'single',
-            query: filterQuery,
             /*
             maxRowsPerPage: 10,
             minRowsPerPage: 10,

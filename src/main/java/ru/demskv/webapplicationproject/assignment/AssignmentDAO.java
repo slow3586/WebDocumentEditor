@@ -26,7 +26,7 @@ public class AssignmentDAO {
         return entityManager.createNamedQuery("Assignment.countAll", Long.class).getSingleResult();
     }
     
-    public List<Assignment> findAll(int from, int limit, String orderBy, boolean desc) {
+    public List<Assignment> findAll(int from, int limit, String orderBy, boolean desc, Integer filterId) {
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<Assignment> cq = cb.createQuery(Assignment.class);
         Root<Assignment> root = cq.from(Assignment.class);
@@ -35,11 +35,10 @@ public class AssignmentDAO {
         else
             cq.orderBy(cb.asc(root.get(orderBy)));
         cq.select(root);
+        if(filterId!=null)
+            cq.where(cb.equal(root.get("id"),filterId));
         return entityManager.createQuery(cq).setFirstResult(from).setMaxResults(limit).getResultList();
-        //String namedQueryName = desc ? "Assignment.findAllDesc" : "Assignment.findAllAsc";
-        //System.out.println(from+" "+limit+" "+orderBy+" "+desc);
-        //return entityManager.createNamedQuery(namedQueryName, Assignment.class).setParameter("columnName", orderBy).setFirstResult(from).setMaxResults(limit).getResultList();        
-    }
+     }
     
     public Optional<Assignment> findById(int id) {
         return Optional.of(entityManager.createNamedQuery("Assignment.findById", Assignment.class).setParameter("id", id).getSingleResult());
