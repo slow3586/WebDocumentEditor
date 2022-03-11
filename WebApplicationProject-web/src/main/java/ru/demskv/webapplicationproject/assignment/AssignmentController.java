@@ -55,25 +55,22 @@ public class AssignmentController {
     @POST
     @Path("")
     @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.APPLICATION_JSON)
     public Response post(@Valid Assignment assignment) {
         assignmentService.create(assignment);
-        return Response.ok().entity("OK").build();
+        return Response.ok().build();
     }
     
     @PUT
     @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response put(@Valid Assignment assignment) {
         assignmentService.update(assignment);
-        return Response.ok().entity("OK").build();
+        return Response.ok().build();
     }
     
     @DELETE
     @Path("{id}")
-    @Produces(MediaType.APPLICATION_JSON)
     public Response delete(@PathParam("id") @Min(1) Integer id) {
         assignmentService.deleteById(id);
-        return Response.ok().entity("OK").build();
+        return Response.ok().build();
     }
 }

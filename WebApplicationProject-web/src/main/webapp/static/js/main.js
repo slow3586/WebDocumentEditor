@@ -1,4 +1,4 @@
-define([
+require([
         "dojo/_base/kernel",
         "dijit/layout/BorderContainer",
         "dijit/layout/TabContainer", 
@@ -9,16 +9,15 @@ define([
         "dojo/store/Memory",
         "dijit/tree/ObjectStoreModel", 
         "dijit/Tree", 
-        "dojo/domReady!",
         "mydojo/assignment_all",
-        "mydojo/assignment_edit"
+        "dojo/domReady!",
 ], function(
         kernel, BorderContainer, TabContainer, MenuBar, DropDownMenu, MenuItem, PopupMenuBarItem, Memory, ObjectStoreModel, Tree,
-        AssignmentAllTab, AssignmentEditTab
+        AssignmentAllTab
 ){
 
     //
-    function createBorderContainer(){
+    var createBorderContainer = function() {
         //Init
         kernel.global.mainBorderContainer = new BorderContainer({style: "height: 100%; width:100%;", liveSplitters:true, gutter:true});
         
@@ -87,16 +86,14 @@ define([
         });
         
         tree.onClick = function(item, node, event){
-            if(item.id==='all_assignments' && !kernel.global.allAssignmentsTabOpen)
-                AssignmentAllTab.openAllAssignmentsTab();
-            if(item.id==='my_assignments')
-                AssignmentAllTab.openAllAssignmentsTab();
-            if(item.id==='for_me_assignments')
-                AssignmentAllTab.openAllAssignmentsTab();
-            if(item.id==='organizations')
-                AssignmentAllTab.openAllAssignmentsTab();
-            if(item.id==='employees')
-                AssignmentAllTab.openAllAssignmentsTab();
+            
+            if(item.id==='all_assignments' && !kernel.global.allAssignmentsTabOpen){
+                AssignmentAllTab();
+            }
+            if(item.id==='my_assignments'){}
+            if(item.id==='for_me_assignments'){}
+            if(item.id==='organizations'){}
+            if(item.id==='employees'){}
         }
         
         kernel.global.mainBorderContainer.addChild(tree);
