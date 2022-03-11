@@ -2,10 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>ru.demskv</groupId>
-    <artifactId>WebApplicationProject-ejb</artifactId>
+    <artifactId>WebApplicationProject-core</artifactId>
     <version>1</version>
-    <packaging>ejb</packaging>
-    <name>WebApplicationProject-ejb</name>
+    <packaging>jar</packaging>
+    <name>WebApplicationProject-core</name>
     <parent>
         <groupId>ru.demskv</groupId>
         <artifactId>WebApplicationProject</artifactId>
@@ -22,11 +22,6 @@
     </properties>
     
     <dependencies>
-        <dependency>
-            <groupId>ru.demskv</groupId>
-            <artifactId>WebApplicationProject-core</artifactId>
-            <version>1</version>
-        </dependency>
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>
@@ -73,13 +68,6 @@
     
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-ejb-plugin</artifactId>
-                <configuration>
-                    <ejbVersion>3.0</ejbVersion>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
